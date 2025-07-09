@@ -25,6 +25,9 @@ class _ProductListState extends State<ProductList> {
 
   @override
   Widget build(BuildContext context) {
+
+    // for multiple provider I can create a separate extension due to single provider I have used here directly
+    
     final provider = Provider.of<AllDataProvider>(context, listen: false);
 
     return Scaffold(
@@ -33,7 +36,7 @@ class _ProductListState extends State<ProductList> {
         actions: [
           IconButton(
             onPressed: (){
-              provider.init();
+              provider.fetchProducts(showSnack: true);
             },
             icon:const Icon(Icons.refresh, color: Colors.white,),
           )

@@ -9,7 +9,6 @@ import 'package:myshop/model/productsList.dart';
 // ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 
-
 class AllDataProvider extends ChangeNotifier {
   HttpService service = HttpService();
 
@@ -23,7 +22,6 @@ class AllDataProvider extends ChangeNotifier {
   bool get isOnline => _isOnline;
   bool get showOfflineBanner => _showOfflineBanner;
 
-
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -35,38 +33,38 @@ class AllDataProvider extends ChangeNotifier {
   List<Products> get products => _filteredProducts;
 
   AllDataProvider(this._productsBox) {
-     init();
+    init();
   }
 
-
-Future<void> init() async {
-
+  Future<void> init() async {
     // ******** for check connectivity
-   await _checkConnectivity();
-    
+    await _checkConnectivity();
+
     // ***** Load cached data firstly
     await _loadCachedProducts();
     // ***********Then we will try to fetch fresh data
     await fetchProducts();
   }
 
-
   Future<void> _checkConnectivity() async {
-
     //***** */ Initial connectivity check
-    
+
     final connectivityResult = await Connectivity().checkConnectivity();
     _isOnline = !connectivityResult.contains(ConnectivityResult.none);
     _showOfflineBanner = !_isOnline;
     notifyListeners();
-      Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) async {
+
+    Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> result) async {
       bool wasOnline = _isOnline;
       _isOnline = !result.contains(ConnectivityResult.none);
       _showOfflineBanner = !_isOnline;
       notifyListeners();
 
       if (_isOnline && !wasOnline) {
-        await fetchProducts(showSnack: true); // fetch fresh and store in Hive
+        await fetchProducts(
+            showSnack: true); // fetch fresh and store in my local Hive
       }
     });
   }
@@ -92,7 +90,7 @@ Future<void> init() async {
   Future<void> _cacheProducts(List<Products> products) async {
     try {
       await _productsBox.clear();
-      
+
       for (final product in products) {
         await _productsBox.add(ProductsHive.fromProducts(product));
       }
@@ -101,15 +99,14 @@ Future<void> init() async {
     }
   }
 
-
   Future<List<Products>> fetchProducts({bool showSnack = false}) async {
-
+    ///// when app is offline I am fetching data from hive
     if (_isOnline == false) {
-    _showOfflineBanner = true;
-    await _loadCachedProducts();
-    notifyListeners();
-    return _filteredProducts;
-  }
+      _showOfflineBanner = true;
+      await _loadCachedProducts();
+      notifyListeners();
+      return _filteredProducts;
+    }
 
     _isLoading = true;
     _errorMessage = null;
@@ -123,8 +120,10 @@ Future<void> init() async {
             .map((json) => Products.fromJson(json))
             .toList();
         _filteredProducts = List.from(_allProduct);
+
         // ********** Caching fresh data
-         await _cacheProducts(_allProduct);
+
+        await _cacheProducts(_allProduct);
         _showOfflineBanner = false;
 
         if (showSnack) {
@@ -132,15 +131,14 @@ Future<void> init() async {
         }
       } else {
         _errorMessage = "Failed to fetch products: ${response.statusText}";
-        if (showSnack) {
-          SnackBarHelper.showErrorSnackBar(_errorMessage!);
-        }
+
+        SnackBarHelper.showErrorSnackBar(_errorMessage!);
       }
     } catch (e) {
       _errorMessage = "Error fetching products: ${e.toString()}";
-      if (showSnack) {
-        SnackBarHelper.showErrorSnackBar(_errorMessage!);
-      }
+
+      SnackBarHelper.showErrorSnackBar(_errorMessage!);
+
       debugPrint("Error in fetchProducts: $e");
 
       if (_allProduct.isNotEmpty) {
@@ -150,89 +148,83 @@ Future<void> init() async {
       _isLoading = false;
       notifyListeners();
     }
-  
-
-
-   
 
     return _filteredProducts;
   }
 
-
+/// it will be use for searching product
 
   void filterProducts(String query) {
     if (query.isEmpty) {
       _filteredProducts = List.from(_allProduct);
     } else {
       _filteredProducts = _allProduct.where((product) {
-        return product.title?.toLowerCase().contains(query.toLowerCase()) == true ||
-              product.category?.toLowerCase().contains(query.toLowerCase()) == true;
+        return product.title?.toLowerCase().contains(query.toLowerCase()) ==
+                true ||
+            product.category?.toLowerCase().contains(query.toLowerCase()) ==
+                true;
       }).toList();
     }
     notifyListeners();
   }
 
+  Future<Products?> fetchSingleProduct({
+    required String productId,
+    bool showSnack = false,
+  }) async {
+    if (!_isOnline) {
+      _showOfflineBanner = true;
 
+      try {
+        final localProduct = _productsBox.values.firstWhereOrNull(
+          (item) => item.id.toString() == productId,
+        );
 
-Future<Products?> fetchSingleProduct({
-  required String productId,
-  bool showSnack = false,
-}) async {
-  if (!_isOnline) {
-    _showOfflineBanner = true;
-
-    try {
-     final localProduct = _productsBox.values.firstWhereOrNull(
-        (item) => item.id.toString() == productId,
-      );
-
-      if (localProduct != null) {
-        return localProduct.toProducts();
-      } else {
-        _errorMessage = "Product not found in offline cache";
+        if (localProduct != null) {
+          return localProduct.toProducts();
+        } else {
+          _errorMessage = "Product not found in offline cache";
+          debugPrint(_errorMessage);
+          return null;
+        }
+      } catch (e) {
+        _errorMessage = "Error loading product from cache: ${e.toString()}";
         debugPrint(_errorMessage);
         return null;
       }
-    } catch (e) {
-      _errorMessage = "Error loading product from cache: ${e.toString()}";
-      debugPrint(_errorMessage);
-      return null;
     }
-  }
 
-  _isLoading = true;
-  _errorMessage = null;
+    _isLoading = true;
+    _errorMessage = null;
 
-  try {
-    Response response = await service.getItems(endpointUrl: 'products/$productId');
+    try {
+      Response response =
+          await service.getItems(endpointUrl: 'products/$productId');
 
-    if (response.isOk) {
-      final product = Products.fromJson(response.body as Map<String, dynamic>);
-      
-      _showOfflineBanner = false;
+      if (response.isOk) {
+        final product =
+            Products.fromJson(response.body as Map<String, dynamic>);
 
-      if (showSnack) {
-        SnackBarHelper.showSuccessSnackBar( "Product fetched successfully");
-      }
-      return product;
-    } else {
-      _errorMessage = "Failed to fetch product: ${response.statusText}";
-      
+        _showOfflineBanner = false;
+
+        if (showSnack) {
+          SnackBarHelper.showSuccessSnackBar("Product fetched successfully");
+        }
+        return product;
+      } else {
+        _errorMessage = "Failed to fetch product: ${response.statusText}";
+
         SnackBarHelper.showErrorSnackBar(_errorMessage!);
-      
-    }
-  } catch (e) {
-    _errorMessage = "Error fetching product: ${e.toString()}";
-    
+      }
+    } catch (e) {
+      _errorMessage = "Error fetching product: ${e.toString()}";
+
       SnackBarHelper.showErrorSnackBar(_errorMessage!);
-    
-  } finally {
-    _isLoading = false;
-    notifyListeners();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+
+    return null;
   }
-
-  return null;
-}
-
-
 }
