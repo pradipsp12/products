@@ -14,6 +14,8 @@ void main() async{
   Hive.registerAdapter(ProductsHiveAdapter());
 
    final productsBox = await Hive.openBox<ProductsHive>('products');
+
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => AllDataProvider(productsBox)),
@@ -31,7 +33,7 @@ class MyApp extends StatelessWidget {
       title: 'Myshop',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
       home: const ProductList(),
