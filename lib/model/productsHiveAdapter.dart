@@ -55,8 +55,8 @@ class ProductsHive extends HiveObject {
       description: product.description,
       category: product.category,
       image: product.image,
-      rate: product.rating?.rate,
-      count: product.rating?.count,
+      rate: product.rating.rate,
+      count: product.rating.count,
       isCached: true,
       lastUpdated: DateTime.now(),
     );
@@ -64,13 +64,13 @@ class ProductsHive extends HiveObject {
 
   Products toProducts() {
     return Products(
-      id: id,
-      title: title,
-      price: price,
-      description: description,
-      category: category,
-      image: image,
-      rating: Rating(rate: rate, count: count),
+      id: id!,
+      title: title!,
+      price: price!,
+      description: description!,
+      category: category!,
+      image: image!,
+      rating: Rating(rate: rate!, count: count!),
     );
   }
 }

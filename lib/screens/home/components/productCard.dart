@@ -20,14 +20,14 @@ class ProductCard extends StatelessWidget {
         children: [
           Expanded(
             child: OpenContainerWrapper(
-              nextScreen: ProductDetails(productId: product.id!,),
+              nextScreen: ProductDetails(productId: product.id,),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Center(
                   child: ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                     child: CachedNetworkImage(
-                      imageUrl: product.image ?? '',
+                      imageUrl: product.image,
                       fit: BoxFit.cover,
                       placeholder: (context, url) =>const Center(child: CircularProgressIndicator()),
                       errorWidget: (context, url, error) =>const Icon(Icons.error),
@@ -48,14 +48,14 @@ class ProductCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product.title ?? '',
+                  product.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style:const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '\$${product.price?.toStringAsFixed(2) ?? '0.00'}',
+                  '\$${product.price.toStringAsFixed(2)}',
                   style:const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.w600),
                 ),
                const SizedBox(height: 4),
@@ -64,7 +64,7 @@ class ProductCard extends StatelessWidget {
                    const Icon(Icons.star, color: Colors.amber, size: 16),
                    const SizedBox(width: 4),
                     Text(
-                      '${product.rating?.rate ?? 0.0} (${product.rating?.count ?? 0})',
+                      '${product.rating.rate} (${product.rating.count})',
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ],

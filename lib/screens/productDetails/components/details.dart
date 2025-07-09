@@ -22,12 +22,12 @@ class Details extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
             ),
-            child: product.image != null
+            child: product.image != ''
                 ? ClipRRect(
                     borderRadius: const BorderRadius.vertical(
                         bottom: Radius.circular(20)),
                     child: CachedNetworkImage(
-                      imageUrl: product.image!,
+                      imageUrl: product.image,
                       fit: BoxFit.contain,
                       placeholder: (context, url) => const Center(
                         child: CircularProgressIndicator(),
@@ -50,7 +50,7 @@ class Details extends StatelessWidget {
               children: [
                 // Title
                 Text(
-                  product.title ?? 'No Title',
+                  product.title,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -60,7 +60,7 @@ class Details extends StatelessWidget {
                 const SizedBox(height: 8),
                 // Price
                 Text(
-                  '\$${product.price?.toStringAsFixed(2) ?? 'N/A'}',
+                  '\$${product.price.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
@@ -71,10 +71,10 @@ class Details extends StatelessWidget {
                 // Rating
                 Row(
                   children: [
-                    Ratings(rating: product.rating?.rate ?? 0),
+                    Ratings(rating: product.rating.rate),
                     const SizedBox(width: 8),
                     Text(
-                      '(${product.rating?.count ?? 0} reviews)',
+                      '(${product.rating.count} reviews)',
                       style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                   ],
@@ -83,7 +83,7 @@ class Details extends StatelessWidget {
                 // Category
                 Chip(
                   label: Text(
-                    product.category?.toUpperCase() ?? 'UNKNOWN',
+                    product.category.toUpperCase(),
                     style: const TextStyle(fontSize: 12, color: Colors.teal),
                   ),
                   backgroundColor: Colors.teal.withOpacity(0.1),
@@ -101,7 +101,7 @@ class Details extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  product.description ?? 'No description available.',
+                  product.description,
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.black54,

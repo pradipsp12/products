@@ -115,7 +115,7 @@ class AllDataProvider extends ChangeNotifier {
     try {
       Response response = await service.getItems(endpointUrl: 'products');
 
-      if (response.isOk) {
+      if (response.statusCode == 200) {
         _allProduct = (response.body as List)
             .map((json) => Products.fromJson(json))
             .toList();
@@ -159,9 +159,9 @@ class AllDataProvider extends ChangeNotifier {
       _filteredProducts = List.from(_allProduct);
     } else {
       _filteredProducts = _allProduct.where((product) {
-        return product.title?.toLowerCase().contains(query.toLowerCase()) ==
+        return product.title.toLowerCase().contains(query.toLowerCase()) ==
                 true ||
-            product.category?.toLowerCase().contains(query.toLowerCase()) ==
+            product.category.toLowerCase().contains(query.toLowerCase()) ==
                 true;
       }).toList();
     }
